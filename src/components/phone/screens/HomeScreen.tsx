@@ -11,6 +11,7 @@ import {
   useTheme,
 } from "../ui";
 import MoodSelector from "../MoodSelector";
+import WellnessCheckIn from "../WellnessCheckIn";
 import { useState } from "react";
 
 const SLEEP_BARS = [55, 70, 45, 80, 60, 90, 50, 75, 40, 85];
@@ -19,7 +20,6 @@ const STRESS_BARS = [10, 12, 14, 35, 18, 60, 75, 70, 85, 95];
 export default function HomeScreen() {
   const { push } = useNav();
   const { ink, muted } = useTheme();
-  const [answer, setAnswer] = useState<"yes" | "no" | null>(null);
 
   return (
     <ScreenShell>
@@ -125,37 +125,9 @@ export default function HomeScreen() {
         </NeoCard>
       </motion.div>
 
-      {/* quiz */}
+      {/* conversational check-in */}
       <motion.div variants={item} className="mt-3">
-        <NeoCard bg={COLORS.mint} padding="p-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-1.5 text-[12px] font-bold text-zinc-900">
-              <Sparkles className="h-3.5 w-3.5" strokeWidth={2.4} />
-              Yes or No Quiz
-            </div>
-            <span className="text-[11px] font-medium text-zinc-700">Question 1/8</span>
-          </div>
-          <p className="mt-3 text-[16px] font-extrabold leading-snug tracking-tight text-zinc-900">
-            Have you been sleeping well recently?
-          </p>
-          <div className="mt-3 flex gap-2">
-            {(["yes", "no"] as const).map((v) => (
-              <motion.button
-                key={v}
-                whileTap={{ scale: 0.96 }}
-                onClick={() => setAnswer(v)}
-                className="flex-1 rounded-2xl py-2.5 text-[13px] font-semibold capitalize"
-                style={{
-                  backgroundColor: answer === v ? COLORS.deepOcean : COLORS.ink,
-                  color: "#fff",
-                  border: "2px solid #18181B",
-                }}
-              >
-                {v}
-              </motion.button>
-            ))}
-          </div>
-        </NeoCard>
+        <WellnessCheckIn />
       </motion.div>
 
       {/* shortcuts */}
