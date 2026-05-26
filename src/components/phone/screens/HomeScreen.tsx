@@ -1,0 +1,293 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { Bed, Smile, Sparkles, ChevronRight, Activity, Moon } from "lucide-react";
+import {
+  AngryFace,
+  BoredFace,
+  COLORS,
+  HappyFace,
+  NeoCard,
+  ScreenShell,
+  SleepyFace,
+  item,
+  useNav,
+  useTheme,
+} from "../ui";
+import { useState } from "react";
+
+const SLEEP_BARS = [55, 70, 45, 80, 60, 90, 50, 75, 40, 85];
+const STRESS_BARS = [10, 12, 14, 35, 18, 60, 75, 70, 85, 95];
+
+const MOODS = [
+  { id: "happy", label: "Happy", bg: COLORS.mintSoft, face: <HappyFace /> },
+  { id: "angry", label: "Angry", bg: COLORS.rose, face: <AngryFace /> },
+  { id: "sleepy", label: "Sleepy", bg: COLORS.blue, face: <SleepyFace /> },
+  { id: "bored", label: "Bored", bg: COLORS.peachSoft, face: <BoredFace /> },
+];
+
+export default function HomeScreen() {
+  const { push } = useNav();
+  const { ink, muted } = useTheme();
+  const [mood, setMood] = useState<string | null>(null);
+  const [answer, setAnswer] = useState<"yes" | "no" | null>(null);
+
+  return (
+    <ScreenShell>
+      <motion.div variants={item} className="mt-3 flex items-center gap-3">
+        <img
+          src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=facearea&facepad=3&w=160&h=160&q=80"
+          alt="Alex Miller"
+          width={44}
+          height={44}
+          loading="lazy"
+          decoding="async"
+          className="h-11 w-11 rounded-full object-cover ring-2 ring-white shadow-[0_4px_8px_-4px_rgba(0,0,0,0.25)]"
+        />
+        <div className="leading-tight">
+          <p className="text-[11px]" style={{ color: muted }}>
+            Welcome back
+          </p>
+          <p className="text-[15px] font-bold" style={{ color: ink }}>
+            Alex Miller
+          </p>
+        </div>
+      </motion.div>
+
+      <motion.p
+        variants={item}
+        className="mt-3 text-[12px] font-medium"
+        style={{ color: muted }}
+      >
+        Sep 14, 2025
+      </motion.p>
+
+      <motion.h1
+        variants={item}
+        className="mt-2 text-[26px] font-extrabold leading-[1.15] tracking-[-0.02em]"
+        style={{ color: ink }}
+      >
+        Hello Alex! How are
+        <br />
+        you feeling today?
+      </motion.h1>
+
+      <motion.div
+        variants={item}
+        className="mt-5 flex gap-2.5 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden"
+      >
+        {MOODS.map((m) => (
+          <MoodChip
+            key={m.id}
+            label={m.label}
+            bg={m.bg}
+            face={m.face}
+            active={mood === m.id}
+            onClick={() => setMood(m.id)}
+          />
+        ))}
+      </motion.div>
+
+      {/* primary cards */}
+      <motion.div variants={item} className="mt-4 grid grid-cols-2 gap-3">
+        <NeoCard bg={COLORS.peach} onClick={() => push("sleep")}>
+          <div className="flex items-center gap-1.5 text-[12px] font-bold text-zinc-900">
+            <Bed className="h-3.5 w-3.5" strokeWidth={2.4} />
+            Sleep Duration
+          </div>
+          <div className="mt-2 flex h-[72px] items-end gap-[3px]">
+            {SLEEP_BARS.map((h, i) => (
+              <motion.span
+                key={i}
+                initial={{ height: 0 }}
+                animate={{ height: `${h}%` }}
+                transition={{
+                  type: "spring",
+                  stiffness: 140,
+                  damping: 18,
+                  delay: 0.3 + i * 0.04,
+                }}
+                className="flex-1 rounded-full"
+                style={{ backgroundColor: COLORS.warmOrange }}
+              />
+            ))}
+          </div>
+          <p className="mt-2 text-[22px] font-extrabold leading-none tracking-tight text-zinc-900">
+            7h 20<span className="text-[14px] font-bold">min</span>
+          </p>
+        </NeoCard>
+
+        <NeoCard bg={COLORS.lavender} onClick={() => push("analytics")}>
+          <div className="flex items-center gap-1.5 text-[12px] font-bold text-zinc-900">
+            <Smile className="h-3.5 w-3.5" strokeWidth={2.4} />
+            Stress Indicator
+          </div>
+          <div className="mt-2 flex h-[72px] items-end gap-[3px]">
+            {STRESS_BARS.map((h, i) => (
+              <motion.span
+                key={i}
+                initial={{ height: 0 }}
+                animate={{ height: `${h}%` }}
+                transition={{
+                  type: "spring",
+                  stiffness: 140,
+                  damping: 18,
+                  delay: 0.4 + i * 0.04,
+                }}
+                className="flex-1 rounded-full"
+                style={{ backgroundColor: COLORS.lavenderMuted }}
+              />
+            ))}
+          </div>
+          <p className="mt-2 text-[22px] font-extrabold leading-none tracking-tight text-zinc-900">
+            High
+          </p>
+        </NeoCard>
+      </motion.div>
+
+      {/* quiz */}
+      <motion.div variants={item} className="mt-3">
+        <NeoCard bg={COLORS.mint} padding="p-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-1.5 text-[12px] font-bold text-zinc-900">
+              <Sparkles className="h-3.5 w-3.5" strokeWidth={2.4} />
+              Yes or No Quiz
+            </div>
+            <span className="text-[11px] font-medium text-zinc-700">Question 1/8</span>
+          </div>
+          <p className="mt-3 text-[16px] font-extrabold leading-snug tracking-tight text-zinc-900">
+            Have you been sleeping well recently?
+          </p>
+          <div className="mt-3 flex gap-2">
+            {(["yes", "no"] as const).map((v) => (
+              <motion.button
+                key={v}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => setAnswer(v)}
+                className="flex-1 rounded-2xl py-2.5 text-[13px] font-semibold capitalize"
+                style={{
+                  backgroundColor: answer === v ? COLORS.deepOcean : COLORS.ink,
+                  color: "#fff",
+                  border: "2px solid #18181B",
+                }}
+              >
+                {v}
+              </motion.button>
+            ))}
+          </div>
+        </NeoCard>
+      </motion.div>
+
+      {/* shortcuts */}
+      <motion.div variants={item} className="mt-3 grid grid-cols-2 gap-3">
+        <ShortcutCard
+          bg={COLORS.sage}
+          label="Daily routine"
+          sub="2 of 5 done"
+          icon={<Activity className="h-4 w-4" strokeWidth={2.4} />}
+          onClick={() => push("routine")}
+        />
+        <ShortcutCard
+          bg={COLORS.blue}
+          label="Sleep recovery"
+          sub="Score 86 last night"
+          icon={<Moon className="h-4 w-4" strokeWidth={2.4} />}
+          onClick={() => push("sleep")}
+        />
+      </motion.div>
+
+      {/* SOS / community */}
+      <motion.div variants={item} className="mt-3 grid grid-cols-2 gap-3">
+        <ShortcutCard
+          bg={COLORS.rose}
+          label="I’m overwhelmed"
+          sub="Open calm space"
+          icon={<Sparkles className="h-4 w-4" strokeWidth={2.4} />}
+          onClick={() => push("calm")}
+        />
+        <ShortcutCard
+          bg={COLORS.lavender}
+          label="Circles"
+          sub="Anonymous support"
+          icon={<ChevronRight className="h-4 w-4" strokeWidth={2.4} />}
+          onClick={() => push("community")}
+        />
+      </motion.div>
+    </ScreenShell>
+  );
+}
+
+function MoodChip({
+  face,
+  label,
+  bg,
+  active,
+  onClick,
+}: {
+  face: React.ReactNode;
+  label: string;
+  bg: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <motion.button
+      whileTap={{ scale: 0.92 }}
+      animate={{ scale: active ? 1.04 : 1 }}
+      transition={{ type: "spring", stiffness: 360, damping: 20 }}
+      onClick={onClick}
+      className="relative flex shrink-0 items-center"
+    >
+      <span
+        className="relative z-10 -mr-3 flex h-9 w-9 items-center justify-center rounded-xl border-2 border-zinc-900"
+        style={{
+          backgroundColor: bg,
+          boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)",
+        }}
+      >
+        {face}
+      </span>
+      <span
+        className="rounded-full border-2 border-zinc-900 py-1 pl-5 pr-3.5 text-[12px] font-bold text-zinc-900"
+        style={{
+          backgroundColor: active ? COLORS.butter : "#fff",
+          boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)",
+        }}
+      >
+        {label}
+      </span>
+    </motion.button>
+  );
+}
+
+function ShortcutCard({
+  bg,
+  label,
+  sub,
+  icon,
+  onClick,
+}: {
+  bg: string;
+  label: string;
+  sub: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <NeoCard bg={bg} onClick={onClick}>
+      <div className="flex items-start justify-between">
+        <span
+          className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-zinc-900 bg-white"
+          style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
+        >
+          {icon}
+        </span>
+        <ChevronRight className="h-4 w-4 text-zinc-700" strokeWidth={2.4} />
+      </div>
+      <p className="mt-2 text-[13px] font-extrabold leading-tight text-zinc-900">
+        {label}
+      </p>
+      <p className="text-[10.5px] text-zinc-700">{sub}</p>
+    </NeoCard>
+  );
+}
