@@ -3,33 +3,22 @@
 import { motion } from "framer-motion";
 import { Bed, Smile, Sparkles, ChevronRight, Activity, Moon } from "lucide-react";
 import {
-  AngryFace,
-  BoredFace,
   COLORS,
-  HappyFace,
   NeoCard,
   ScreenShell,
-  SleepyFace,
   item,
   useNav,
   useTheme,
 } from "../ui";
+import MoodSelector from "../MoodSelector";
 import { useState } from "react";
 
 const SLEEP_BARS = [55, 70, 45, 80, 60, 90, 50, 75, 40, 85];
 const STRESS_BARS = [10, 12, 14, 35, 18, 60, 75, 70, 85, 95];
 
-const MOODS = [
-  { id: "happy", label: "Happy", bg: COLORS.mintSoft, face: <HappyFace /> },
-  { id: "angry", label: "Angry", bg: COLORS.rose, face: <AngryFace /> },
-  { id: "sleepy", label: "Sleepy", bg: COLORS.blue, face: <SleepyFace /> },
-  { id: "bored", label: "Bored", bg: COLORS.peachSoft, face: <BoredFace /> },
-];
-
 export default function HomeScreen() {
   const { push } = useNav();
   const { ink, muted } = useTheme();
-  const [mood, setMood] = useState<string | null>(null);
   const [answer, setAnswer] = useState<"yes" | "no" | null>(null);
 
   return (
@@ -74,18 +63,9 @@ export default function HomeScreen() {
 
       <motion.div
         variants={item}
-        className="mt-5 flex gap-2.5 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden"
+        className="mt-5"
       >
-        {MOODS.map((m) => (
-          <MoodChip
-            key={m.id}
-            label={m.label}
-            bg={m.bg}
-            face={m.face}
-            active={mood === m.id}
-            onClick={() => setMood(m.id)}
-          />
-        ))}
+        <MoodSelector />
       </motion.div>
 
       {/* primary cards */}
@@ -214,49 +194,6 @@ export default function HomeScreen() {
         />
       </motion.div>
     </ScreenShell>
-  );
-}
-
-function MoodChip({
-  face,
-  label,
-  bg,
-  active,
-  onClick,
-}: {
-  face: React.ReactNode;
-  label: string;
-  bg: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <motion.button
-      whileTap={{ scale: 0.92 }}
-      animate={{ scale: active ? 1.04 : 1 }}
-      transition={{ type: "spring", stiffness: 360, damping: 20 }}
-      onClick={onClick}
-      className="relative flex shrink-0 items-center"
-    >
-      <span
-        className="relative z-10 -mr-3 flex h-9 w-9 items-center justify-center rounded-xl border-2 border-zinc-900"
-        style={{
-          backgroundColor: bg,
-          boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)",
-        }}
-      >
-        {face}
-      </span>
-      <span
-        className="rounded-full border-2 border-zinc-900 py-1 pl-5 pr-3.5 text-[12px] font-bold text-zinc-900"
-        style={{
-          backgroundColor: active ? COLORS.butter : "#fff",
-          boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)",
-        }}
-      >
-        {label}
-      </span>
-    </motion.button>
   );
 }
 
