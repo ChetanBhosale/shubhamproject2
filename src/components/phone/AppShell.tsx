@@ -2,17 +2,17 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
+import { IconContext } from "@phosphor-icons/react";
 import {
-  Bot,
+  Brain,
   ChevronLeft,
-  Home as HomeIcon,
-  Menu,
+  HomeIcon,
   Moon,
   NotebookPen,
   Sun,
   User2,
   Wind,
-} from "lucide-react";
+} from "../phone/icons";
 import {
   NavProvider,
   PhoneFrame,
@@ -69,16 +69,24 @@ export default function AppShell() {
   );
 
   return (
-    <ThemeProvider theme={theme} toggle={() => setTheme((t) => (t === "light" ? "dark" : "light"))}>
-      <NavProvider value={nav}>
-        <PhoneFrame>
-          <ShellInner
-            tabTitle={TAB_TITLE[tab]}
-            stackTitle={stack ? STACK_TITLE[stack] : null}
-          />
-        </PhoneFrame>
-      </NavProvider>
-    </ThemeProvider>
+    <IconContext.Provider
+      value={{
+        weight: "bold",
+        size: "1em",
+        mirrored: false,
+      }}
+    >
+      <ThemeProvider theme={theme} toggle={() => setTheme((t) => (t === "light" ? "dark" : "light"))}>
+        <NavProvider value={nav}>
+          <PhoneFrame>
+            <ShellInner
+              tabTitle={TAB_TITLE[tab]}
+              stackTitle={stack ? STACK_TITLE[stack] : null}
+            />
+          </PhoneFrame>
+        </NavProvider>
+      </ThemeProvider>
+    </IconContext.Provider>
   );
 }
 
@@ -157,14 +165,14 @@ function ShellInner({
         <div className="flex items-center gap-2">
           {stack ? (
             <ChipButton onClick={pop} aria="Back">
-              <ChevronLeft className="h-4 w-4" strokeWidth={2.6} />
+              <ChevronLeft className="h-4 w-4" />
             </ChipButton>
           ) : (
             <ChipButton onClick={toggle} aria="Toggle theme">
               {isDark ? (
-                <Sun className="h-4 w-4" strokeWidth={2.6} />
+                <Sun className="h-4 w-4" />
               ) : (
-                <Moon className="h-4 w-4" strokeWidth={2.6} />
+                <Moon className="h-4 w-4" />
               )}
             </ChipButton>
           )}
@@ -175,9 +183,6 @@ function ShellInner({
             {stackTitle ?? tabTitle}
           </p>
         </div>
-        <ChipButton aria="Menu">
-          <Menu className="h-4 w-4" strokeWidth={2.6} />
-        </ChipButton>
       </div>
 
       {/* Scrollable screen area */}
@@ -262,16 +267,15 @@ function BottomNav() {
   const { theme } = useTheme();
   const dark = theme === "dark";
 
-  /* Unified icon style: same stroke width, same hit size, consistent visual weight */
+  /* Unified icon style: same hit size, weight handled globally via IconContext */
   const ICON = "h-[18px] w-[18px]";
-  const STROKE = 1.8;
 
   const items: { id: Tab; icon: React.ReactNode; label: string }[] = [
-    { id: "home", label: "Home", icon: <HomeIcon className={ICON} strokeWidth={STROKE} /> },
-    { id: "journal", label: "Journal", icon: <NotebookPen className={ICON} strokeWidth={STROKE} /> },
-    { id: "chat", label: "Lumi", icon: <Bot className={ICON} strokeWidth={STROKE} /> },
-    { id: "meditate", label: "Breathe", icon: <Wind className={ICON} strokeWidth={STROKE} /> },
-    { id: "profile", label: "You", icon: <User2 className={ICON} strokeWidth={STROKE} /> },
+    { id: "home", label: "Home", icon: <HomeIcon className={ICON} /> },
+    { id: "journal", label: "Journal", icon: <NotebookPen className={ICON} /> },
+    { id: "chat", label: "Lumi", icon: <Brain className={ICON} /> },
+    { id: "meditate", label: "Breathe", icon: <Wind className={ICON} /> },
+    { id: "profile", label: "You", icon: <User2 className={ICON} /> },
   ];
 
   /* Premium matte palette */

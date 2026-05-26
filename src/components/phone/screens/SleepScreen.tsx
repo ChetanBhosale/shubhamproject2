@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Bed, Moon, Music2 } from "lucide-react";
+import { Bed, Moon, Music2 } from "../icons";
 import { useState } from "react";
 import { ScreenShell, item } from "../ui";
 
@@ -65,7 +65,7 @@ export default function SleepScreen() {
               color: HEADING,
             }}
           >
-            <Moon className="h-4 w-4" strokeWidth={2.4} />
+            <Moon className="h-4 w-4" />
           </span>
         </motion.div>
 
@@ -152,7 +152,7 @@ export default function SleepScreen() {
                     boxShadow: `inset 0 0 0 1px ${BORDER}`,
                   }}
                 >
-                  <Bed className="h-4 w-4" strokeWidth={2.4} />
+                  <Bed className="h-4 w-4" />
                 </span>
                 <span
                   className="flex-1 text-[13.5px] font-semibold"
@@ -202,7 +202,7 @@ export default function SleepScreen() {
                 >
                   <Music2
                     className="mx-auto mb-1 h-4 w-4"
-                    strokeWidth={2.4}
+
                     style={{ color: on ? MINT_TEAL : LABEL }}
                   />
                   {s.l}

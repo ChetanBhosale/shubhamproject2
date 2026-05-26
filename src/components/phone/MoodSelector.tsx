@@ -4,11 +4,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
   BookOpen,
-  Headphones,
-  Sparkles,
-  Wind,
   ChevronRight,
-} from "lucide-react";
+  ChatCircleDots,
+  Compass,
+  Headphones,
+  Lightbulb,
+  Target,
+  Wind,
+} from "./icons";
 
 /* --------------------------------- types --------------------------------- */
 
@@ -235,7 +238,7 @@ function RevealPanel({ mood }: { mood: Mood }) {
               className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full border-2 border-zinc-900 bg-white"
               style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
             >
-              <Sparkles className="h-3.5 w-3.5" strokeWidth={2.4} />
+              <Lightbulb className="h-3.5 w-3.5" />
             </span>
             <div className="leading-snug">
               <p
@@ -299,7 +302,7 @@ function RevealPanel({ mood }: { mood: Mood }) {
                 <p className="text-[12px] font-extrabold text-zinc-900">{f.label}</p>
                 <p className="text-[10.5px] text-zinc-600">{f.sub}</p>
               </div>
-              <ChevronRight className="h-3.5 w-3.5 text-zinc-500" strokeWidth={2.4} />
+              <ChevronRight className="h-3.5 w-3.5 text-zinc-500" />
             </motion.button>
           ))}
         </motion.div>
@@ -312,33 +315,33 @@ function flowsFor(id: MoodId) {
   switch (id) {
     case "happy":
       return [
-        { label: "Capture it", sub: "1-min gratitude note", icon: <BookOpen className="h-4 w-4" strokeWidth={2.4} /> },
-        { label: "Soft playlist", sub: "Sun-warm tones", icon: <Headphones className="h-4 w-4" strokeWidth={2.4} /> },
+        { label: "Capture it", sub: "1-min gratitude note", icon: <BookOpen className="h-4 w-4" /> },
+        { label: "Soft playlist", sub: "Sun-warm tones", icon: <Headphones className="h-4 w-4" /> },
       ];
     case "calm":
       return [
-        { label: "Box breath", sub: "4 · 4 · 6, 1 min", icon: <Wind className="h-4 w-4" strokeWidth={2.4} /> },
-        { label: "Body scan", sub: "5-min ambient", icon: <Headphones className="h-4 w-4" strokeWidth={2.4} /> },
+        { label: "Box breath", sub: "4 · 4 · 6, 1 min", icon: <Wind className="h-4 w-4" /> },
+        { label: "Body scan", sub: "5-min ambient", icon: <Headphones className="h-4 w-4" /> },
       ];
     case "motivated":
       return [
-        { label: "One small step", sub: "Add to streak", icon: <Sparkles className="h-4 w-4" strokeWidth={2.4} /> },
-        { label: "Focus tone", sub: "25-min flow", icon: <Headphones className="h-4 w-4" strokeWidth={2.4} /> },
+        { label: "One small step", sub: "Add to streak", icon: <Target className="h-4 w-4" /> },
+        { label: "Focus tone", sub: "25-min flow", icon: <Headphones className="h-4 w-4" /> },
       ];
     case "sleepy":
       return [
-        { label: "Wind down", sub: "Sleep recovery", icon: <Wind className="h-4 w-4" strokeWidth={2.4} /> },
-        { label: "Sleep story", sub: "12-min drift", icon: <Headphones className="h-4 w-4" strokeWidth={2.4} /> },
+        { label: "Wind down", sub: "Sleep recovery", icon: <Wind className="h-4 w-4" /> },
+        { label: "Sleep story", sub: "12-min drift", icon: <Headphones className="h-4 w-4" /> },
       ];
     case "anxious":
       return [
-        { label: "5-4-3-2-1", sub: "Grounding · 90s", icon: <Wind className="h-4 w-4" strokeWidth={2.4} /> },
-        { label: "Tell Lumi", sub: "Talk it out", icon: <Sparkles className="h-4 w-4" strokeWidth={2.4} /> },
+        { label: "5-4-3-2-1", sub: "Grounding · 90s", icon: <Wind className="h-4 w-4" /> },
+        { label: "Tell Lumi", sub: "Talk it out", icon: <ChatCircleDots className="h-4 w-4" /> },
       ];
     case "angry":
       return [
-        { label: "Long exhale", sub: "60s · cool down", icon: <Wind className="h-4 w-4" strokeWidth={2.4} /> },
-        { label: "Vent page", sub: "Private journal", icon: <BookOpen className="h-4 w-4" strokeWidth={2.4} /> },
+        { label: "Long exhale", sub: "60s · cool down", icon: <Wind className="h-4 w-4" /> },
+        { label: "Vent page", sub: "Private journal", icon: <BookOpen className="h-4 w-4" /> },
       ];
   }
 }

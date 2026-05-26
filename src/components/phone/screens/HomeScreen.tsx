@@ -1,7 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Bed, Smile, Sparkles, ChevronRight, Activity, Moon } from "lucide-react";
+import {
+  Activity,
+  Bed,
+  ChevronRight,
+  LifeBuoy,
+  Moon,
+  Smile,
+  Users,
+} from "../icons";
 import {
   COLORS,
   NeoCard,
@@ -12,7 +20,6 @@ import {
 } from "../ui";
 import MoodSelector from "../MoodSelector";
 import WellnessCheckIn from "../WellnessCheckIn";
-import { useState } from "react";
 
 const SLEEP_BARS = [55, 70, 45, 80, 60, 90, 50, 75, 40, 85];
 const STRESS_BARS = [10, 12, 14, 35, 18, 60, 75, 70, 85, 95];
@@ -61,10 +68,7 @@ export default function HomeScreen() {
         you feeling today?
       </motion.h1>
 
-      <motion.div
-        variants={item}
-        className="mt-5"
-      >
+      <motion.div variants={item} className="mt-5">
         <MoodSelector />
       </motion.div>
 
@@ -72,7 +76,7 @@ export default function HomeScreen() {
       <motion.div variants={item} className="mt-4 grid grid-cols-2 gap-3">
         <NeoCard bg={COLORS.peach} onClick={() => push("sleep")}>
           <div className="flex items-center gap-1.5 text-[12px] font-bold text-zinc-900">
-            <Bed className="h-3.5 w-3.5" strokeWidth={2.4} />
+            <Bed className="h-3.5 w-3.5" />
             Sleep Duration
           </div>
           <div className="mt-2 flex h-[72px] items-end gap-[3px]">
@@ -99,7 +103,7 @@ export default function HomeScreen() {
 
         <NeoCard bg={COLORS.lavender} onClick={() => push("analytics")}>
           <div className="flex items-center gap-1.5 text-[12px] font-bold text-zinc-900">
-            <Smile className="h-3.5 w-3.5" strokeWidth={2.4} />
+            <Smile className="h-3.5 w-3.5" />
             Stress Indicator
           </div>
           <div className="mt-2 flex h-[72px] items-end gap-[3px]">
@@ -136,14 +140,14 @@ export default function HomeScreen() {
           bg={COLORS.sage}
           label="Daily routine"
           sub="2 of 5 done"
-          icon={<Activity className="h-4 w-4" strokeWidth={2.4} />}
+          icon={<Activity className="h-4 w-4" />}
           onClick={() => push("routine")}
         />
         <ShortcutCard
           bg={COLORS.blue}
           label="Sleep recovery"
           sub="Score 86 last night"
-          icon={<Moon className="h-4 w-4" strokeWidth={2.4} />}
+          icon={<Moon className="h-4 w-4" />}
           onClick={() => push("sleep")}
         />
       </motion.div>
@@ -154,14 +158,14 @@ export default function HomeScreen() {
           bg={COLORS.rose}
           label="I’m overwhelmed"
           sub="Open calm space"
-          icon={<Sparkles className="h-4 w-4" strokeWidth={2.4} />}
+          icon={<LifeBuoy className="h-4 w-4" />}
           onClick={() => push("calm")}
         />
         <ShortcutCard
           bg={COLORS.lavender}
           label="Circles"
           sub="Anonymous support"
-          icon={<ChevronRight className="h-4 w-4" strokeWidth={2.4} />}
+          icon={<Users className="h-4 w-4" />}
           onClick={() => push("community")}
         />
       </motion.div>
@@ -191,7 +195,7 @@ function ShortcutCard({
         >
           {icon}
         </span>
-        <ChevronRight className="h-4 w-4 text-zinc-700" strokeWidth={2.4} />
+        <ChevronRight className="h-4 w-4 text-zinc-700" />
       </div>
       <p className="mt-2 text-[13px] font-extrabold leading-tight text-zinc-900">
         {label}

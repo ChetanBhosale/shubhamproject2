@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mic, SendHorizonal, Sparkles } from "lucide-react";
+import { ChatCircleDots, Mic, SendHorizonal, Sun } from "../icons";
 import { useEffect, useRef, useState } from "react";
 import { COLORS, NeoCard, ScreenShell, item, useTheme } from "../ui";
 
@@ -58,7 +58,7 @@ export default function AIChatScreen() {
               boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)",
             }}
           >
-            <Sparkles className="h-4 w-4" strokeWidth={2.4} />
+            <ChatCircleDots className="h-4 w-4" />
           </span>
           <div className="leading-tight">
             <p className="text-[13px] font-extrabold" style={{ color: ink }}>
@@ -72,8 +72,9 @@ export default function AIChatScreen() {
 
         <motion.div variants={item} className="mt-3">
           <NeoCard bg={COLORS.butter} padding="px-3 py-2">
-            <p className="text-[11px] font-semibold text-zinc-800">
-              ☀ Daily check-in · 1 min
+            <p className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-800">
+              <Sun className="h-3.5 w-3.5" />
+              Daily check-in · 1 min
             </p>
           </NeoCard>
         </motion.div>
@@ -161,7 +162,7 @@ export default function AIChatScreen() {
               boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)",
             }}
           >
-            <Mic className="h-4 w-4" strokeWidth={2.4} />
+            <Mic className="h-4 w-4" />
           </button>
           <motion.button
             whileTap={{ scale: 0.92 }}
@@ -169,7 +170,7 @@ export default function AIChatScreen() {
             className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-zinc-900 bg-zinc-900 text-white"
             style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
           >
-            <SendHorizonal className="h-4 w-4" strokeWidth={2.4} />
+            <SendHorizonal className="h-4 w-4" />
           </motion.button>
         </div>
       </div>

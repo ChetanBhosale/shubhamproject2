@@ -3,26 +3,31 @@
 import { AnimatePresence, motion, Reorder, useDragControls } from "framer-motion";
 import {
   ArrowRight,
+  Bed,
   BookOpen,
   Brain,
+  Check,
   ChevronLeft,
   Coffee,
+  Compass,
   Droplet,
   Flame,
+  Footprints,
   GripVertical,
   Headphones,
   Heart,
   Leaf,
+  Lightbulb,
   Moon,
   Pause,
   Play,
   Plus,
-  Sparkles,
   Sun,
+  Target,
   Trash2,
   Wind,
   X,
-} from "lucide-react";
+} from "../icons";
 import { useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { ScreenShell, item, useTheme } from "../ui";
 
@@ -51,7 +56,92 @@ type Block = {
   tint: string;
 };
 
-type Stage = "intent" | "build" | "execute";
+type Stage = "today" | "intent" | "build" | "execute";
+
+/* -------------------------- today list persistence ------------------------ */
+
+type TodayTask = {
+  id: string;
+  label: string;
+  benefit: string;
+  duration: number;
+  done: boolean;
+  tint: string;
+  iconKey: keyof typeof ICON_MAP;
+};
+
+const ICON_MAP = {
+  Bed,
+  Compass,
+  Coffee,
+  Droplet,
+  Footprints,
+  Headphones,
+  Leaf,
+  Lightbulb,
+  Moon,
+  Sun,
+  Target,
+  Wind,
+  BookOpen,
+} as const;
+
+const SEED_TODAY: TodayTask[] = [
+  { id: "sun", label: "Morning sunlight", benefit: "Sets your circadian rhythm", duration: 5, done: false, tint: "#FFE7B5", iconKey: "Sun" },
+  { id: "water", label: "Drink water", benefit: "500 ml · 2/8", duration: 1, done: false, tint: "#DEE9F1", iconKey: "Droplet" },
+  { id: "walk", label: "Walk 20 min", benefit: "Outside · daylight", duration: 20, done: false, tint: "#DDEAE0", iconKey: "Footprints" },
+  { id: "phone", label: "No-phone breakfast", benefit: "Slow your morning down", duration: 15, done: false, tint: "#F4C7B0", iconKey: "Coffee" },
+  { id: "moon", label: "Bed by 10:30", benefit: "Wind down · dim lights", duration: 1, done: false, tint: "#E5E6F2", iconKey: "Moon" },
+];
+
+const TODAY_KEY = "tozumlo.routine.today.v1";
+
+function loadToday(): TodayTask[] | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(TODAY_KEY);
+    return raw ? (JSON.parse(raw) as TodayTask[]) : null;
+  } catch {
+    return null;
+  }
+}
+
+function persistToday(list: TodayTask[]) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(TODAY_KEY, JSON.stringify(list));
+  } catch {
+    /* ignore */
+  }
+}
+
+function blocksToToday(goal: Goal, blocks: Block[]): TodayTask[] {
+  return blocks.map((b, i) => ({
+    id: `${b.id}-${i}-${Date.now()}`,
+    label: b.label,
+    benefit: b.benefit,
+    duration: b.duration,
+    done: false,
+    tint: b.tint,
+    iconKey: iconKeyFor(b.Icon),
+  }));
+}
+
+function iconKeyFor(c: ComponentType<{ className?: string }>): keyof typeof ICON_MAP {
+  if (c === Bed) return "Bed";
+  if (c === Coffee) return "Coffee";
+  if (c === Droplet) return "Droplet";
+  if (c === Footprints) return "Footprints";
+  if (c === Headphones) return "Headphones";
+  if (c === Leaf) return "Leaf";
+  if (c === Lightbulb) return "Lightbulb";
+  if (c === Moon) return "Moon";
+  if (c === Sun) return "Sun";
+  if (c === Target) return "Target";
+  if (c === Wind) return "Wind";
+  if (c === BookOpen) return "BookOpen";
+  return "Compass";
+}
 
 /* ----------------------------- design tokens ----------------------------- */
 
@@ -229,7 +319,7 @@ const LIBRARY: Record<GoalId, Block[]> = {
       duration: 6,
       benefit: "Brings attention out of thoughts",
       reasoning: "Your evening loops calm faster after a scan.",
-      Icon: Sparkles,
+      Icon: Compass,
       tint: TINT.sage,
     },
     {
@@ -267,7 +357,7 @@ const LIBRARY: Record<GoalId, Block[]> = {
       duration: 1,
       benefit: "Anchors attention to a single thread",
       reasoning: "Single-intent sessions doubled your focus score.",
-      Icon: Sparkles,
+      Icon: Target,
       tint: TINT.sage,
     },
     {
@@ -314,7 +404,7 @@ const LIBRARY: Record<GoalId, Block[]> = {
       duration: 1,
       benefit: "A single thread to follow today",
       reasoning: "Helps your evening close cleanly.",
-      Icon: Sparkles,
+      Icon: Target,
       tint: TINT.warm,
     },
   ],
@@ -334,7 +424,7 @@ const LIBRARY: Record<GoalId, Block[]> = {
       duration: 2,
       benefit: "Brings you back into the room",
       reasoning: "You rate calm 4/5 within 5 min of grounding.",
-      Icon: Sparkles,
+      Icon: Compass,
       tint: TINT.feel,
     },
     {
@@ -383,7 +473,7 @@ const ALL_EXTRAS: Block[] = [
     duration: 5,
     benefit: "Light movement lowers stress",
     reasoning: "Your cortisol dips faster with movement.",
-    Icon: Sparkles,
+    Icon: Footprints,
     tint: TINT.blue,
   },
 ];
@@ -392,15 +482,41 @@ const ALL_EXTRAS: Block[] = [
 
 export default function RoutineScreen() {
   const { ink, muted } = useTheme();
-  const [stage, setStage] = useState<Stage>("intent");
+  const [stage, setStage] = useState<Stage>("today");
   const [goal, setGoal] = useState<Goal | null>(null);
   const [blocks, setBlocks] = useState<Block[]>([]);
+  const [today, setToday] = useState<TodayTask[]>(SEED_TODAY);
+
+  // hydrate today list once on mount
+  useEffect(() => {
+    const stored = loadToday();
+    if (stored && stored.length) setToday(stored);
+  }, []);
+
+  // persist whenever today changes
+  useEffect(() => {
+    persistToday(today);
+  }, [today]);
 
   function chooseGoal(g: Goal) {
     setGoal(g);
     setBlocks(LIBRARY[g.id]);
-    // give the selection animation a beat to play
     window.setTimeout(() => setStage("build"), 480);
+  }
+
+  function saveAsToday(g: Goal, b: Block[]) {
+    setToday(blocksToToday(g, b));
+    setStage("today");
+  }
+
+  function toggleTask(id: string) {
+    setToday((arr) =>
+      arr.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
+    );
+  }
+
+  function resetToday() {
+    setToday(SEED_TODAY.map((t) => ({ ...t, done: false })));
   }
 
   return (
@@ -418,6 +534,25 @@ export default function RoutineScreen() {
       />
 
       <AnimatePresence mode="wait">
+        {stage === "today" && (
+          <motion.div
+            key="today"
+            initial={{ opacity: 0, y: 12, filter: "blur(6px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -10, filter: "blur(6px)" }}
+            transition={{ type: "spring", stiffness: 220, damping: 26 }}
+          >
+            <TodayStage
+              tasks={today}
+              onToggle={toggleTask}
+              onPlan={() => setStage("intent")}
+              onReset={resetToday}
+              ink={ink}
+              muted={muted}
+            />
+          </motion.div>
+        )}
+
         {stage === "intent" && (
           <motion.div
             key="intent"
@@ -426,7 +561,13 @@ export default function RoutineScreen() {
             exit={{ opacity: 0, y: -10, filter: "blur(6px)" }}
             transition={{ type: "spring", stiffness: 220, damping: 26 }}
           >
-            <IntentStage onChoose={chooseGoal} selected={goal?.id} ink={ink} muted={muted} />
+            <IntentStage
+              onChoose={chooseGoal}
+              onBack={() => setStage("today")}
+              selected={goal?.id}
+              ink={ink}
+              muted={muted}
+            />
           </motion.div>
         )}
 
@@ -444,6 +585,7 @@ export default function RoutineScreen() {
               setBlocks={setBlocks}
               onBack={() => setStage("intent")}
               onStart={() => setStage("execute")}
+              onSaveAsToday={() => saveAsToday(goal, blocks)}
               ink={ink}
               muted={muted}
             />
@@ -474,18 +616,31 @@ export default function RoutineScreen() {
 
 function IntentStage({
   onChoose,
+  onBack,
   selected,
   ink,
   muted,
 }: {
   onChoose: (g: Goal) => void;
+  onBack: () => void;
   selected?: GoalId;
   ink: string;
   muted: string;
 }) {
   return (
     <ScreenShell>
-      <motion.div variants={item} className="mt-1">
+      <motion.button
+        variants={item}
+        whileTap={{ scale: 0.97 }}
+        onClick={onBack}
+        className="mt-1 flex w-fit items-center gap-1 rounded-full border-2 border-zinc-900 bg-white px-2.5 py-1.5 text-[11px] font-bold text-zinc-900"
+        style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
+      >
+        <ChevronLeft className="h-3.5 w-3.5" />
+        Today
+      </motion.button>
+
+      <motion.div variants={item} className="mt-3">
         <p
           className="text-[11px] font-bold uppercase tracking-[0.16em]"
           style={{ color: muted }}
@@ -544,7 +699,7 @@ function IntentStage({
                   boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)",
                 }}
               >
-                <g.Icon className="h-4 w-4" strokeWidth={2.4} />
+                <g.Icon className="h-4 w-4" />
               </span>
               <p
                 className="relative z-10 mt-3 text-[13.5px] font-extrabold leading-tight"
@@ -564,7 +719,7 @@ function IntentStage({
       </motion.div>
 
       <motion.div variants={item} className="mt-5 flex items-center gap-2 text-[11px] font-medium" style={{ color: muted }}>
-        <Sparkles className="h-3.5 w-3.5" strokeWidth={2.4} />
+        <Lightbulb className="h-3.5 w-3.5" />
         Crafted from your last 7 days · sleep, mood, and screen time.
       </motion.div>
     </ScreenShell>
@@ -579,6 +734,7 @@ function BuildStage({
   setBlocks,
   onBack,
   onStart,
+  onSaveAsToday,
   ink,
   muted,
 }: {
@@ -587,6 +743,7 @@ function BuildStage({
   setBlocks: (b: Block[]) => void;
   onBack: () => void;
   onStart: () => void;
+  onSaveAsToday: () => void;
   ink: string;
   muted: string;
 }) {
@@ -621,7 +778,7 @@ function BuildStage({
           className="flex items-center gap-1 rounded-full border-2 border-zinc-900 bg-white px-2.5 py-1.5 text-[11px] font-bold text-zinc-900"
           style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
         >
-          <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.6} />
+          <ChevronLeft className="h-3.5 w-3.5" />
           Goal
         </button>
         <span
@@ -685,13 +842,13 @@ function BuildStage({
           onClick={() => setShowAdd(true)}
           className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-zinc-900 bg-white/60 py-2.5 text-[12px] font-bold text-zinc-900 backdrop-blur"
         >
-          <Plus className="h-3.5 w-3.5" strokeWidth={2.6} />
+          <Plus className="h-3.5 w-3.5" />
           Add a ritual
         </motion.button>
       </motion.div>
 
       {/* CTA */}
-      <motion.div variants={item} className="mt-4">
+      <motion.div variants={item} className="mt-4 space-y-2">
         <motion.button
           whileTap={{ scale: 0.97 }}
           whileHover={{ y: -1 }}
@@ -704,7 +861,18 @@ function BuildStage({
           }}
         >
           Begin tonight's ritual
-          <ArrowRight className="h-4 w-4" strokeWidth={2.6} />
+          <ArrowRight className="h-4 w-4" />
+        </motion.button>
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          whileHover={{ y: -1 }}
+          disabled={blocks.length === 0}
+          onClick={onSaveAsToday}
+          className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-zinc-900 bg-white px-3 py-2.5 text-[12.5px] font-extrabold tracking-tight text-zinc-900 disabled:opacity-50"
+          style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Save to Today's list
         </motion.button>
       </motion.div>
 
@@ -747,7 +915,7 @@ function AdaptiveInsight({ goal }: { goal: Goal }) {
           className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full border-2 border-zinc-900 bg-white"
           style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
         >
-          <Sparkles className="h-3.5 w-3.5" strokeWidth={2.4} />
+          <Lightbulb className="h-3.5 w-3.5" />
         </span>
         <div className="leading-snug">
           <p
@@ -856,7 +1024,7 @@ function BlockRow({
             aria-label="Drag"
             className="cursor-grab touch-none text-zinc-400 active:cursor-grabbing"
           >
-            <GripVertical className="h-4 w-4" strokeWidth={2.4} />
+            <GripVertical className="h-4 w-4" />
           </button>
 
           <span
@@ -867,7 +1035,7 @@ function BlockRow({
               boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)",
             }}
           >
-            <Icon className="h-4 w-4" strokeWidth={2.4} />
+            <Icon className="h-4 w-4" />
           </span>
 
           <button
@@ -887,7 +1055,7 @@ function BlockRow({
             aria-label="Remove"
             className="rounded-full p-1.5 text-zinc-400 hover:text-zinc-700"
           >
-            <Trash2 className="h-3.5 w-3.5" strokeWidth={2.4} />
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
 
@@ -985,7 +1153,7 @@ function AddRitualSheet({
             style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
             aria-label="Close"
           >
-            <X className="h-3.5 w-3.5" strokeWidth={2.6} />
+            <X className="h-3.5 w-3.5" />
           </button>
         </div>
         <p className="mt-1 text-[11.5px] font-medium text-zinc-600">
@@ -1010,13 +1178,13 @@ function AddRitualSheet({
                   boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)",
                 }}
               >
-                <b.Icon className="h-4 w-4" strokeWidth={2.4} />
+                <b.Icon className="h-4 w-4" />
               </span>
               <div className="flex-1 leading-tight">
                 <p className="text-[13px] font-extrabold text-zinc-900">{b.label}</p>
                 <p className="text-[10.5px] text-zinc-600">{b.duration} min · {b.benefit}</p>
               </div>
-              <Plus className="h-4 w-4 text-zinc-700" strokeWidth={2.6} />
+              <Plus className="h-4 w-4 text-zinc-700" />
             </motion.button>
           ))}
         </div>
@@ -1160,7 +1328,7 @@ function ExecuteStage({
             className="flex items-center gap-1 rounded-full border-2 border-zinc-900 bg-white px-2.5 py-1.5 text-[11px] font-bold text-zinc-900"
             style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
           >
-            <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.6} />
+            <ChevronLeft className="h-3.5 w-3.5" />
             Exit
           </button>
           <div className="flex items-center gap-2">
@@ -1222,7 +1390,7 @@ function ExecuteStage({
                     color: goal.ink,
                   }}
                 >
-                  <current.Icon className="h-7 w-7" strokeWidth={2.2} />
+                  <current.Icon className="h-7 w-7" />
                 </motion.div>
 
                 <p
@@ -1260,7 +1428,7 @@ function ExecuteStage({
                   boxShadow: "4px 4px 0 0 rgba(24,24,27,0.95)",
                 }}
               >
-                <Heart className="h-8 w-8 text-white" strokeWidth={2.2} />
+                <Heart className="h-8 w-8 text-white" />
               </span>
               <h2 className="mt-5 text-[22px] font-extrabold leading-tight tracking-tight text-zinc-900">
                 You closed the day softly.
@@ -1283,7 +1451,7 @@ function ExecuteStage({
                 style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
                 aria-label="Previous"
               >
-                <ChevronLeft className="h-4 w-4" strokeWidth={2.6} />
+                <ChevronLeft className="h-4 w-4" />
               </button>
               <motion.button
                 whileTap={{ scale: 0.94 }}
@@ -1296,9 +1464,9 @@ function ExecuteStage({
                 aria-label={paused ? "Resume" : "Pause"}
               >
                 {paused ? (
-                  <Play className="h-5 w-5" strokeWidth={2.4} />
+                  <Play className="h-5 w-5" />
                 ) : (
-                  <Pause className="h-5 w-5" strokeWidth={2.4} />
+                  <Pause className="h-5 w-5" />
                 )}
               </motion.button>
               <button
@@ -1310,7 +1478,7 @@ function ExecuteStage({
                 style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
                 aria-label="Next"
               >
-                <ArrowRight className="h-4 w-4" strokeWidth={2.6} />
+                <ArrowRight className="h-4 w-4" />
               </button>
             </>
           )}
@@ -1349,7 +1517,7 @@ function AmbientPicker({ ink, tint }: { ink: string; tint: string }) {
         className="flex items-center gap-1.5 rounded-full border-2 border-zinc-900 bg-white px-2.5 py-1.5 text-[11px] font-bold text-zinc-900"
         style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
       >
-        <Headphones className="h-3.5 w-3.5" strokeWidth={2.4} />
+        <Headphones className="h-3.5 w-3.5" />
         {current.label}
       </motion.button>
 
@@ -1411,3 +1579,180 @@ function fmt(s: number) {
 
 /* unused symbol guard */
 void Flame;
+
+
+/* ============================== STAGE 0: TODAY ============================== */
+
+function TodayStage({
+  tasks,
+  onToggle,
+  onPlan,
+  onReset,
+  ink,
+  muted,
+}: {
+  tasks: TodayTask[];
+  onToggle: (id: string) => void;
+  onPlan: () => void;
+  onReset: () => void;
+  ink: string;
+  muted: string;
+}) {
+  const done = tasks.filter((t) => t.done).length;
+  const total = tasks.length;
+  const totalMin = tasks.reduce((s, t) => s + t.duration, 0);
+
+  return (
+    <ScreenShell>
+      {/* header */}
+      <motion.div
+        variants={item}
+        className="mt-1 flex items-center justify-between"
+      >
+        <div className="leading-tight">
+          <p
+            className="text-[11px] font-bold uppercase tracking-[0.16em]"
+            style={{ color: muted }}
+          >
+            Today's rituals
+          </p>
+          <p className="text-[20px] font-extrabold tracking-tight" style={{ color: ink }}>
+            Routine
+          </p>
+        </div>
+        <div
+          className="rounded-full border-2 border-zinc-900 bg-white px-3 py-1 text-[11px] font-bold text-zinc-900"
+          style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
+        >
+          <Flame className="-mt-0.5 mr-1 inline h-3 w-3" /> 9 day streak
+        </div>
+      </motion.div>
+
+      {/* progress + minutes */}
+      <motion.div variants={item} className="mt-3 grid grid-cols-2 gap-3">
+        <div
+          className="rounded-[20px] border-2 border-zinc-900 p-3"
+          style={{
+            backgroundColor: "#D8E7DC",
+            boxShadow: "3px 3px 0 0 rgba(24,24,27,0.95)",
+          }}
+        >
+          <p className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-zinc-700">
+            Done
+          </p>
+          <p className="mt-0.5 text-[22px] font-extrabold leading-none tracking-tight text-zinc-900">
+            {done}
+            <span className="text-[12px] font-bold">/{total}</span>
+          </p>
+          <div className="mt-2 flex gap-1">
+            {tasks.map((_, i) => (
+              <span
+                key={i}
+                className="h-2.5 flex-1 rounded-full border-2 border-zinc-900"
+                style={{
+                  backgroundColor: i < done ? "#3F8B7C" : "#fff",
+                }}
+              />
+            ))}
+          </div>
+        </div>
+        <div
+          className="rounded-[20px] border-2 border-zinc-900 p-3"
+          style={{
+            backgroundColor: "#FFE7B5",
+            boxShadow: "3px 3px 0 0 rgba(24,24,27,0.95)",
+          }}
+        >
+          <p className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-zinc-700">
+            Today
+          </p>
+          <p className="mt-0.5 text-[22px] font-extrabold leading-none tracking-tight text-zinc-900">
+            {totalMin} <span className="text-[12px] font-bold">min total</span>
+          </p>
+          <p className="mt-1 text-[10.5px] text-zinc-700">
+            {total} ritual{total === 1 ? "" : "s"} on your list
+          </p>
+        </div>
+      </motion.div>
+
+      {/* task list */}
+      <motion.div variants={item} className="mt-4 space-y-2.5">
+        {tasks.map((t) => {
+          const Icon = ICON_MAP[t.iconKey] ?? Compass;
+          return (
+            <div
+              key={t.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => onToggle(t.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") onToggle(t.id);
+              }}
+              className="flex cursor-pointer items-center gap-3 rounded-[20px] border-2 border-zinc-900 p-2.5"
+              style={{
+                backgroundColor: t.tint,
+                boxShadow: "3px 3px 0 0 rgba(24,24,27,0.95)",
+              }}
+            >
+              <span
+                className="flex h-9 w-9 items-center justify-center rounded-xl border-2 border-zinc-900 bg-white"
+                style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
+              >
+                <Icon className="h-4 w-4" />
+              </span>
+              <div className="flex-1 leading-tight">
+                <p
+                  className="text-[13px] font-bold text-zinc-900"
+                  style={{ textDecoration: t.done ? "line-through" : "none" }}
+                >
+                  {t.label}
+                </p>
+                <p className="text-[10.5px] text-zinc-700">
+                  {t.duration} min · {t.benefit}
+                </p>
+              </div>
+              <motion.span
+                animate={{ scale: t.done ? 1 : 0.95 }}
+                className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-zinc-900"
+                style={{
+                  backgroundColor: t.done ? "#003F54" : "#fff",
+                  color: t.done ? "#fff" : "#18181B",
+                  boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)",
+                }}
+              >
+                {t.done && <Check className="h-3.5 w-3.5" />}
+              </motion.span>
+            </div>
+          );
+        })}
+      </motion.div>
+
+      {/* actions */}
+      <motion.div variants={item} className="mt-4 flex gap-2">
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          whileHover={{ y: -1 }}
+          onClick={onPlan}
+          className="flex flex-1 items-center justify-center gap-2 rounded-full border-2 border-zinc-900 px-3 py-3 text-[13px] font-extrabold tracking-tight text-white"
+          style={{
+            background: "linear-gradient(180deg,#3F8B7C 0%,#003F54 100%)",
+            boxShadow: "3px 3px 0 0 rgba(24,24,27,0.95)",
+          }}
+        >
+          <Plus className="h-4 w-4" />
+          Plan a new ritual
+        </motion.button>
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          whileHover={{ y: -1 }}
+          onClick={onReset}
+          aria-label="Reset today"
+          className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-zinc-900 bg-white"
+          style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
+        >
+          <Trash2 className="h-4 w-4" />
+        </motion.button>
+      </motion.div>
+    </ScreenShell>
+  );
+}

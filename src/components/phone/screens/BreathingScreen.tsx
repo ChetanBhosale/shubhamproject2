@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Headphones, Moon, Pause, Play, Volume2 } from "lucide-react";
+import { Headphones, Moon, Pause, Play, Volume2 } from "../icons";
 import { useState } from "react";
 import { COLORS, NeoCard, ScreenShell, item, useTheme } from "../ui";
 
@@ -65,7 +65,7 @@ export default function BreathingScreen() {
           className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-zinc-900 bg-white"
           style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
         >
-          <Volume2 className="h-4 w-4" strokeWidth={2.4} />
+          <Volume2 className="h-4 w-4" />
         </button>
         <motion.button
           whileTap={{ scale: 0.92 }}
@@ -74,16 +74,16 @@ export default function BreathingScreen() {
           style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
         >
           {playing ? (
-            <Pause className="h-5 w-5" strokeWidth={2.4} />
+            <Pause className="h-5 w-5" />
           ) : (
-            <Play className="h-5 w-5" strokeWidth={2.4} />
+            <Play className="h-5 w-5" />
           )}
         </motion.button>
         <button
           className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-zinc-900 bg-white"
           style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
         >
-          <Headphones className="h-4 w-4" strokeWidth={2.4} />
+          <Headphones className="h-4 w-4" />
         </button>
       </motion.div>
 
@@ -121,7 +121,7 @@ export default function BreathingScreen() {
               className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-zinc-900 bg-white"
               style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
             >
-              <Moon className="h-4 w-4" strokeWidth={2.4} />
+              <Moon className="h-4 w-4" />
             </span>
             <div className="flex-1 leading-tight">
               <p className="text-[13px] font-bold text-zinc-900">Sleep meditation</p>

@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
-import { Heart, RefreshCw, Sparkles } from "lucide-react";
+import { Compass, Heart, Lightbulb, RefreshCw } from "./icons";
 
 /* ----------------------------- conversation ----------------------------- */
 
@@ -170,7 +170,7 @@ export default function WellnessCheckIn() {
                 boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)",
               }}
             >
-              <Sparkles className="h-3.5 w-3.5" strokeWidth={2.4} />
+              <Compass className="h-3.5 w-3.5" />
             </span>
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-zinc-700">
               Lumi · gentle check-in
@@ -357,7 +357,7 @@ function Summary({
           className="flex items-center gap-1.5 rounded-full border-2 border-zinc-900 bg-white px-3 py-2 text-[11.5px] font-bold text-zinc-900"
           style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
         >
-          <RefreshCw className="h-3.5 w-3.5" strokeWidth={2.4} />
+          <RefreshCw className="h-3.5 w-3.5" />
           Re-check in
         </button>
         <button
@@ -367,7 +367,7 @@ function Summary({
             boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)",
           }}
         >
-          <Heart className="h-3.5 w-3.5" strokeWidth={2.4} />
+          <Heart className="h-3.5 w-3.5" />
           Begin tonight's plan
         </button>
       </div>
