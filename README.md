@@ -1,4 +1,4 @@
-# Mindora
+# Tozumlo Test
 
 Emotional wellness companion for everyday mental health. An interactive mobile app prototype rendered as a polished iPhone 16 Pro mockup, with a navigable flow across nine screens.
 

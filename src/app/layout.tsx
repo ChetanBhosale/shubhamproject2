@@ -16,12 +16,12 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Mindora — Emotional wellness companion",
-    template: "%s · Mindora",
+    default: "Tozumlo Test — Emotional wellness companion",
+    template: "%s · Tozumlo Test",
   },
   description:
     "Emotional wellness companion for everyday mental health. Journal, breathe, track your mood, and find calm.",
-  applicationName: "Mindora",
+  applicationName: "Tozumlo Test",
   keywords: [
     "mental health",
     "wellness",
@@ -29,19 +29,19 @@ export const metadata: Metadata = {
     "meditation",
     "mood tracking",
     "mindfulness",
-    "Mindora",
+    "Tozumlo Test",
   ],
-  authors: [{ name: "Mindora" }],
+  authors: [{ name: "Tozumlo Test" }],
   openGraph: {
-    title: "Mindora — Emotional wellness companion",
+    title: "Tozumlo Test — Emotional wellness companion",
     description:
       "Journal, breathe, track your mood, and find calm. A premium mental wellness companion.",
     type: "website",
-    siteName: "Mindora",
+    siteName: "Tozumlo Test",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mindora — Emotional wellness companion",
+    title: "Tozumlo Test — Emotional wellness companion",
     description:
       "Journal, breathe, track your mood, and find calm.",
   },
