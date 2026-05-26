@@ -261,58 +261,112 @@ function BottomNav() {
   const { tab, setTab } = useNav();
   const { theme } = useTheme();
   const dark = theme === "dark";
-  const items: { id: Tab; icon: React.ReactNode }[] = [
-    { id: "home", icon: <HomeIcon className="h-4 w-4" strokeWidth={2.4} /> },
-    { id: "journal", icon: <NotebookPen className="h-4 w-4" strokeWidth={2.4} /> },
-    { id: "chat", icon: <Bot className="h-4 w-4" strokeWidth={2.4} /> },
-    { id: "meditate", icon: <Wind className="h-4 w-4" strokeWidth={2.4} /> },
-    { id: "profile", icon: <User2 className="h-4 w-4" strokeWidth={2.4} /> },
+
+  /* Unified icon style: same stroke width, same hit size, consistent visual weight */
+  const ICON = "h-[18px] w-[18px]";
+  const STROKE = 1.8;
+
+  const items: { id: Tab; icon: React.ReactNode; label: string }[] = [
+    { id: "home", label: "Home", icon: <HomeIcon className={ICON} strokeWidth={STROKE} /> },
+    { id: "journal", label: "Journal", icon: <NotebookPen className={ICON} strokeWidth={STROKE} /> },
+    { id: "chat", label: "Lumi", icon: <Bot className={ICON} strokeWidth={STROKE} /> },
+    { id: "meditate", label: "Breathe", icon: <Wind className={ICON} strokeWidth={STROKE} /> },
+    { id: "profile", label: "You", icon: <User2 className={ICON} strokeWidth={STROKE} /> },
   ];
+
+  /* Premium matte palette */
+  const containerBg = dark
+    ? "linear-gradient(180deg, rgba(8,42,56,0.92) 0%, rgba(2,28,40,0.92) 100%)"
+    : "linear-gradient(180deg, rgba(28,28,30,0.94) 0%, rgba(12,12,14,0.94) 100%)";
+  const containerBorder = dark
+    ? "inset 0 0 0 1px rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.08)"
+    : "inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.07)";
+  const containerShadow = dark
+    ? "0 1px 0 rgba(255,255,255,0.04), 0 18px 40px -16px rgba(0,30,45,0.65), 0 8px 20px -10px rgba(0,30,45,0.45)"
+    : "0 1px 0 rgba(255,255,255,0.04), 0 18px 40px -16px rgba(0,0,0,0.55), 0 8px 20px -10px rgba(0,0,0,0.35)";
+
+  const pillFill = dark
+    ? "linear-gradient(180deg, #6FC2B0 0%, #3F8B7C 100%)"
+    : "linear-gradient(180deg, #FAFAFA 0%, #E9E9EC 100%)";
+  const pillShadow = dark
+    ? "0 6px 14px -6px rgba(0,30,45,0.7), inset 0 1px 0 rgba(255,255,255,0.45), inset 0 0 0 1px rgba(255,255,255,0.18)"
+    : "0 6px 14px -6px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.85), inset 0 0 0 1px rgba(0,0,0,0.06)";
+
+  const activeColor = dark ? "#022C3D" : "#18181B";
+  const inactiveColor = dark ? "rgba(220,232,236,0.55)" : "rgba(255,255,255,0.55)";
+  const inactiveHover = dark ? "rgba(220,232,236,0.85)" : "rgba(255,255,255,0.9)";
+
   return (
-    <div className="absolute bottom-5 left-1/2 z-30 -translate-x-1/2">
-      <div
-        className="flex items-center gap-1 rounded-full border-2 p-1.5"
-        style={{
-          backgroundColor: dark ? "#003F54" : "#18181B",
-          borderColor: dark ? "rgba(236,236,236,0.3)" : "#18181B",
-          boxShadow: dark
-            ? "0 14px 30px -12px rgba(0,30,45,0.7)"
-            : "0 14px 30px -12px rgba(0,0,0,0.55)",
-        }}
-      >
-        {items.map((it) => {
-          const active = tab === it.id;
-          return (
-            <motion.button
-              key={it.id}
-              onClick={() => setTab(it.id)}
-              whileTap={{ scale: 0.92 }}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full"
-            >
-              {active && (
-                <motion.span
-                  layoutId="navPill"
-                  className="absolute inset-0 rounded-full"
-                  style={{ backgroundColor: dark ? "#57A999" : "#ffffff" }}
-                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                />
-              )}
-              <span
-                className={`relative z-10 ${
-                  active
-                    ? dark
-                      ? "text-[#003F54]"
-                      : "text-zinc-900"
-                    : dark
-                    ? "text-[#9FB6BF]"
-                    : "text-zinc-400"
-                }`}
+    <div className="pointer-events-none absolute inset-x-0 bottom-5 z-30 flex justify-center">
+      <div className="relative pointer-events-auto">
+        {/* Soft ambient floor shadow */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -bottom-2 left-1/2 h-3 w-[78%] -translate-x-1/2 rounded-[50%] blur-md"
+          style={{
+            backgroundColor: dark
+              ? "rgba(0,30,45,0.45)"
+              : "rgba(0,0,0,0.28)",
+          }}
+        />
+
+        <div
+          className="flex items-center gap-1 rounded-full px-2 py-2 backdrop-blur-md"
+          style={{
+            background: containerBg,
+            boxShadow: `${containerBorder}, ${containerShadow}`,
+          }}
+        >
+          {items.map((it) => {
+            const active = tab === it.id;
+            return (
+              <motion.button
+                key={it.id}
+                aria-label={it.label}
+                onClick={() => setTab(it.id)}
+                whileTap={{ scale: 0.9 }}
+                whileHover={!active ? { y: -1 } : undefined}
+                transition={{ type: "spring", stiffness: 420, damping: 26 }}
+                className="relative flex h-10 w-10 items-center justify-center rounded-full"
               >
-                {it.icon}
-              </span>
-            </motion.button>
-          );
-        })}
+                {active && (
+                  <motion.span
+                    layoutId="navPill"
+                    className="absolute inset-[3px] rounded-full"
+                    style={{
+                      background: pillFill,
+                      boxShadow: pillShadow,
+                    }}
+                    transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                  />
+                )}
+                {/* hairline halo behind active pill for richer depth */}
+                {active && dark && (
+                  <motion.span
+                    layoutId="navPillGlow"
+                    className="absolute -inset-1 rounded-full"
+                    style={{
+                      background:
+                        "radial-gradient(closest-side, rgba(111,194,176,0.35), transparent 70%)",
+                    }}
+                    transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                  />
+                )}
+                <motion.span
+                  animate={{
+                    color: active ? activeColor : inactiveColor,
+                    scale: active ? 1.02 : 1,
+                  }}
+                  whileHover={!active ? { color: inactiveHover } : undefined}
+                  transition={{ type: "spring", stiffness: 360, damping: 26 }}
+                  className="relative z-10 flex"
+                >
+                  {it.icon}
+                </motion.span>
+              </motion.button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
