@@ -653,36 +653,9 @@ function BuildStage({
         </h1>
       </motion.div>
 
-      {/* AI insight */}
+      {/* Adaptive AI insight */}
       <motion.div variants={item} className="mt-3">
-        <div
-          className="flex items-start gap-2.5 rounded-[20px] border-2 border-zinc-900 px-3 py-2.5"
-          style={{
-            backgroundColor: goal.tint,
-            boxShadow: "3px 3px 0 0 rgba(24,24,27,0.95)",
-          }}
-        >
-          <span
-            className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full border-2 border-zinc-900 bg-white"
-            style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
-          >
-            <Sparkles className="h-3.5 w-3.5" strokeWidth={2.4} />
-          </span>
-          <div className="leading-snug">
-            <p
-              className="text-[10.5px] font-bold uppercase tracking-[0.14em]"
-              style={{ color: goal.ink }}
-            >
-              Lumi · adaptive insight
-            </p>
-            <p
-              className="mt-0.5 text-[12.5px] font-extrabold tracking-tight"
-              style={{ color: goal.ink }}
-            >
-              {insightFor(goal.id)}
-            </p>
-          </div>
-        </div>
+        <AdaptiveInsight goal={goal} />
       </motion.div>
 
       {/* reorderable blocks */}
@@ -746,6 +719,96 @@ function BuildStage({
         )}
       </AnimatePresence>
     </ScreenShell>
+  );
+}
+
+function AdaptiveInsight({ goal }: { goal: Goal }) {
+  const data = ADAPTIVE_INSIGHTS[goal.id];
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    setIdx(0);
+    const id = window.setInterval(() => {
+      setIdx((i) => (i + 1) % data.observations.length);
+    }, 4200);
+    return () => window.clearInterval(id);
+  }, [data]);
+
+  return (
+    <div
+      className="overflow-hidden rounded-[20px] border-2 border-zinc-900"
+      style={{
+        backgroundColor: goal.tint,
+        boxShadow: "3px 3px 0 0 rgba(24,24,27,0.95)",
+      }}
+    >
+      <div className="flex items-start gap-2.5 px-3 pb-1 pt-2.5">
+        <span
+          className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full border-2 border-zinc-900 bg-white"
+          style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
+        >
+          <Sparkles className="h-3.5 w-3.5" strokeWidth={2.4} />
+        </span>
+        <div className="leading-snug">
+          <p
+            className="text-[10.5px] font-bold uppercase tracking-[0.14em]"
+            style={{ color: goal.ink }}
+          >
+            Lumi · adaptive insight
+          </p>
+          <p
+            className="mt-0.5 text-[12.5px] font-extrabold tracking-tight"
+            style={{ color: goal.ink }}
+          >
+            {data.headline}
+          </p>
+        </div>
+      </div>
+
+      {/* rotating observation */}
+      <div
+        className="mx-3 mb-3 mt-2 rounded-xl border border-white/40 bg-white/55 px-2.5 py-2 backdrop-blur"
+        style={{ boxShadow: "inset 0 0 0 1px rgba(24,24,27,0.06)" }}
+      >
+        <p
+          className="text-[10px] font-bold uppercase tracking-[0.16em]"
+          style={{ color: goal.ink, opacity: 0.7 }}
+        >
+          From your last 7 days
+        </p>
+        <div className="relative mt-0.5 min-h-[28px]">
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={idx}
+              initial={{ opacity: 0, y: 6, filter: "blur(4px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -6, filter: "blur(4px)" }}
+              transition={{ type: "spring", stiffness: 240, damping: 26 }}
+              className="text-[12px] font-medium"
+              style={{ color: goal.ink }}
+            >
+              {data.observations[idx]}
+            </motion.p>
+          </AnimatePresence>
+        </div>
+
+        {/* observation pips */}
+        <div className="mt-2 flex gap-1">
+          {data.observations.map((_, i) => (
+            <motion.span
+              key={i}
+              animate={{
+                width: i === idx ? 16 : 6,
+                opacity: i === idx ? 1 : 0.45,
+              }}
+              transition={{ type: "spring", stiffness: 280, damping: 24 }}
+              className="h-1 rounded-full"
+              style={{ backgroundColor: goal.ink }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -962,22 +1025,59 @@ function AddRitualSheet({
   );
 }
 
-function insightFor(id: GoalId) {
-  switch (id) {
-    case "sleep":
-      return "Your recovery improves when journaling is included.";
-    case "stress":
-      return "You unwind 22% faster after a long-exhale breath.";
-    case "quiet-mind":
-      return "Two-minute pauses outperform longer meditations for you.";
-    case "focus":
-      return "Single-intent sessions doubled your focus this week.";
-    case "morning":
-      return "Sunlight in the first hour aligns with deeper sleep tonight.";
-    case "reset":
-      return "A warm ritual + soft letter lifts your next-morning mood.";
-  }
-}
+const ADAPTIVE_INSIGHTS: Record<
+  GoalId,
+  { headline: string; observations: string[] }
+> = {
+  sleep: {
+    headline: "Your recovery improves when journaling is included.",
+    observations: [
+      "Sleep onset is 14 min faster on phone-away nights.",
+      "Restorative nights cluster after a 4·4·6 box breath.",
+      "You drift sooner with a 12-min sleep story than with music.",
+    ],
+  },
+  stress: {
+    headline: "You unwind 22% faster after a long-exhale breath.",
+    observations: [
+      "Stress trends down on days you stretch in the evening.",
+      "Vent journaling drops next-morning tension by ~18%.",
+      "Rain ambience shortens your loops by about 3 min.",
+    ],
+  },
+  "quiet-mind": {
+    headline: "Two-minute pauses outperform longer meditations for you.",
+    observations: [
+      "Body scans calm your evening loops fastest.",
+      "Three-line gratitude lifts your weekly mood by ~12%.",
+      "You re-enter focus quicker after a stillness break.",
+    ],
+  },
+  focus: {
+    headline: "Single-intent sessions doubled your focus this week.",
+    observations: [
+      "Hydrating first beats a coffee-first start for you.",
+      "Low-frequency tones extend flow by 9 min on average.",
+      "You stay focused longer when sessions are 25 min, not 50.",
+    ],
+  },
+  morning: {
+    headline: "Sunlight in the first hour aligns with deeper sleep.",
+    observations: [
+      "Hydrate-first mornings begin smoother than coffee-first ones.",
+      "Ten deep breaths replace the alarm jolt without snooze.",
+      "Picking one priority closes your evening cleanly.",
+    ],
+  },
+  reset: {
+    headline: "A warm ritual + soft letter lifts your next-morning mood.",
+    observations: [
+      "Your overwhelm score dips fastest after warm rituals.",
+      "Grounding within 5 minutes brings calm back at 4/5.",
+      "Self-letters tend to lift your mood the next morning.",
+    ],
+  },
+};
 
 /* ============================== STAGE 3: EXECUTE ============================== */
 
@@ -1063,12 +1163,15 @@ function ExecuteStage({
             <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.6} />
             Exit
           </button>
-          <span
-            className="rounded-full border-2 border-zinc-900 bg-white px-3 py-1 text-[11px] font-bold text-zinc-900"
-            style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
-          >
-            {Math.min(step + 1, blocks.length)} / {blocks.length}
-          </span>
+          <div className="flex items-center gap-2">
+            <AmbientPicker ink={goal.ink} tint={goal.tint} />
+            <span
+              className="rounded-full border-2 border-zinc-900 bg-white px-3 py-1 text-[11px] font-bold text-zinc-900"
+              style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
+            >
+              {Math.min(step + 1, blocks.length)} / {blocks.length}
+            </span>
+          </div>
         </div>
 
         {/* progress segments */}
@@ -1222,6 +1325,72 @@ function ExecuteStage({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ambient soundscape picker for execute mode */
+function AmbientPicker({ ink, tint }: { ink: string; tint: string }) {
+  const SOUNDS = [
+    { id: "off", label: "Quiet" },
+    { id: "rain", label: "Rain" },
+    { id: "ocean", label: "Ocean" },
+    { id: "forest", label: "Forest" },
+  ];
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState("rain");
+  const current = SOUNDS.find((s) => s.id === active) ?? SOUNDS[0];
+
+  return (
+    <div className="relative">
+      <motion.button
+        whileTap={{ scale: 0.94 }}
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5 rounded-full border-2 border-zinc-900 bg-white px-2.5 py-1.5 text-[11px] font-bold text-zinc-900"
+        style={{ boxShadow: "2px 2px 0 0 rgba(24,24,27,0.95)" }}
+      >
+        <Headphones className="h-3.5 w-3.5" strokeWidth={2.4} />
+        {current.label}
+      </motion.button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 320, damping: 26 }}
+            className="absolute right-0 top-full z-30 mt-2 rounded-2xl border-2 border-zinc-900 bg-white p-1.5"
+            style={{ boxShadow: "3px 3px 0 0 rgba(24,24,27,0.95)" }}
+          >
+            <div className="flex flex-col gap-1">
+              {SOUNDS.map((s) => {
+                const on = active === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => {
+                      setActive(s.id);
+                      setOpen(false);
+                    }}
+                    className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-[11.5px] font-bold"
+                    style={{
+                      backgroundColor: on ? tint : "transparent",
+                      color: on ? ink : "#1B1B1B",
+                    }}
+                  >
+                    <span
+                      className="h-1.5 w-1.5 rounded-full"
+                      style={{ backgroundColor: on ? ink : "rgba(24,24,27,0.25)" }}
+                    />
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
